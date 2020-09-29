@@ -12,12 +12,77 @@ router.get('/', async (req, res, next) => {
     } catch(e) {
         var error = new Error(e)
         res.statusCode = 403;
+        res.send('TABLE DOES NOT EXISTS!');
         next(error);
     }
 });
 
+router.get('/eliminarTemporal', async (req, res, next) => {
+    try {
+        let result = await p1db.dropTemporal();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
+    } catch(e) {
+        var error = new Error("Table is already dropped.")
+        res.statusCode = 403;
+        res.send(error);
+        next(error);    
+    }
+});
+
 router.get('/cargarModelo', async (req, res, next) => {
-    res.send('CargarModelo')
+    try {
+        let result = await p1db.setModel();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        res.send('TABLE ALREADY EXISTS!')
+        next(error);    
+    }
+});
+
+router.get('/cargarTemporal', async (req, res, next) => {
+    try {
+        let result = await p1db.setData();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json("DATA LOADED SUCCESSFULLY!");
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        next(error);    
+    }
+});
+
+
+router.get('/consulta1', async (req, res, next) => {
+    try {
+        let result = await p1db.query1();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        next(error);    
+    }
+});
+
+router.get('/consulta2', async (req, res, next) => {
+    try {
+        let result = await p1db.query2();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        next(error);    
+    }
 });
 
 module.exports = router;
