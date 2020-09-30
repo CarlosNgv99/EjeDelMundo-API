@@ -85,4 +85,43 @@ router.get('/consulta2', async (req, res, next) => {
     }
 });
 
+router.get('/consulta3', async (req, res, next) => {
+    try {
+        let result = await p1db.query3();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        next(error);    
+    }
+});
+
+router.get('/consulta4', async (req, res, next) => {
+    try {
+        let result = await p1db.query4();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        next(error);    
+    }
+});
+
+router.get('/consulta5', async (req, res, next) => {
+    try {
+        let result = await p1db.query5();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        next(error);    
+    }
+});
+
 module.exports = router;

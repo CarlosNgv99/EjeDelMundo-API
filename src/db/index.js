@@ -199,17 +199,110 @@ p1db.query1 = () => {
 p1db.query2 = () => {
   return new Promise((resolve, reject) => {
     pool.query(`
-    
-    SELECT per.person_id, per.person_name,
-    SUM(d.product_qty * p.product_unit_price) as total,
-    Count(per.person_id) as ocurrences
+
+    SELECT query2.person_id, query2.person_name, SUM(total_products) as total_purchased FROM
+    (SELECT per.person_id, per.person_name, c.company_name, d.product_qty,p.product_name,
+    SUM(d.product_qty) as total_products,
+    Count(per.person_Name) as person_ocurrences
     FROM p1db.disposition d
     JOIN p1db.product p ON p.product_id = d.product_id
     JOIN p1db.person per on per.person_id = d.person_id
     JOIN p1db.company c on c.company_id = d.company_id
-    WHERE per.person_type = 'C' and per.person_id = d.person_id 
-    GROUP BY per.person_id, per.person_name
-    ORDER BY total DESC limit 1;
+    WHERE c.company_id = d.company_id and per.person_type = 'C'
+    GROUP BY per.person_id, per.person_name, c.company_name, d.product_qty, p.product_name) as query2
+    GROUP BY query2.person_id, query2.person_name
+    ORDER BY total_purchased DESC limit 1;
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
+p1db.query3 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+
+    SELECT query1.person_address, query1.person_region, query1.person_city, query1.person_postal_code, query1.orders_made FROM
+    (SELECT per.person_address, per.person_region, per.person_city, per.person_postal_code,
+    Count(per.person_address) as orders_made
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE per.person_type = 'P'
+    GROUP BY per.person_address,per.person_region, per.person_city, per.person_postal_code
+    ORDER BY orders_made DESC LIMIT 1) as query1
+    UNION
+    SELECT query2.person_address, query2.person_region, query2.person_city, query2.person_postal_code, query2.orders_made FROM
+    (SELECT per.person_address, per.person_region, per.person_city, per.person_postal_code,
+    Count(per.person_address) as orders_made
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE per.person_type = 'P'
+    GROUP BY per.person_address,per.person_region, per.person_city, per.person_postal_code
+    ORDER BY orders_made ASC LIMIT 1) as query2;
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
+
+
+p1db.query4 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+    
+    SELECT per.person_id, per.person_name, p.product_category,
+    COUNT(per.person_name) as person_orders,
+    SUM(d.product_qty * p.product_unit_price) as total
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE p.product_category = 'Cheese' and per.person_type = 'C'
+    GROUP BY per.person_id, per.person_name, p.product_category
+    ORDER BY total DESC LIMIT 5;
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
+p1db.query5 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+    
+    SELECT query1.month1 , query1.person_name, query1.person_orders FROM
+    (SELECT EXTRACT(MONTH FROM per.person_registration_date) as month1, per.person_name,
+    COUNT(per.person_name) as person_orders
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE per.person_type = 'C'
+    GROUP BY per.person_name, month1
+    ORDER BY person_orders DESC LIMIT 5) as query1
+    UNION
+    SELECT query2.month2, query2.person_name, query2.person_orders FROM
+    (SELECT EXTRACT(MONTH FROM per.person_registration_date) as month2, per.person_name,
+    COUNT(per.person_name) as person_orders
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE per.person_type = 'C'
+    GROUP BY  per.person_name, month2
+    ORDER BY person_orders ASC LIMIT 5) as query2;
 
     `, (err, res) => {
       if(err) {
