@@ -313,4 +313,88 @@ p1db.query5 = () => {
   });
 }
 
+p1db.query6 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+    
+    SELECT query5.product_category, query5.total_amount FROM
+    (SELECT query1.product_category, SUM(query1.total) as total_amount FROM
+    (SELECT p.product_category, p.product_name, d.product_qty, p.product_unit_price,
+    SUM(d.product_qty * p.product_unit_price) as total,
+    COUNT(p.product_category) as product_count
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    GROUP BY p.product_category, p.product_name, d.product_qty, p.product_unit_price) as query1
+    GROUP BY query1.product_category
+    ORDER BY total_amount DESC LIMIT 1) as query5
+    UNION
+    SELECT query4.product_category, query4.total_amount FROM
+    (SELECT query2.product_category, SUM(query2.total) as total_amount FROM
+    (SELECT p.product_category, p.product_name, d.product_qty, p.product_unit_price,
+    SUM(d.product_qty * p.product_unit_price) as total,
+    COUNT(p.product_category) as product_count
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    GROUP BY p.product_category, p.product_name, d.product_qty, p.product_unit_price) as query2
+    GROUP BY query2.product_category
+    ORDER BY total_amount ASC LIMIT 1) as query4;
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
+
+p1db.query7 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+    
+    SELECT per.person_id, per.person_name, p.product_category,
+    COUNT(per.person_name) as person_orders,
+    SUM(d.product_qty * p.product_unit_price) as total
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE p.product_category = 'Fresh Vegetables' and per.person_type = 'P'
+    GROUP BY per.person_id, per.person_name, p.product_category
+    ORDER BY total DESC LIMIT 5;
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
+p1db.query10 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+    
+    SELECT per.person_name, p.product_category,
+    COUNT(per.person_name) as person_ocurrences,
+    SUM(d.product_qty) as total_products
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE p.product_category = 'Seafood' and per.person_type = 'C'
+    GROUP BY per.person_name, p.product_category
+    ORDER BY total_products DESC LIMIT 10;
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
 module.exports = p1db;
