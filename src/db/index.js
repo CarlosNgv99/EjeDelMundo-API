@@ -374,6 +374,66 @@ p1db.query7 = () => {
   });
 }
 
+p1db.query8 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+    
+    SELECT query1.person_address, query1.person_region, query1.person_city, query1.person_postal_code,query1.total FROM
+    (SELECT per.person_name,per.person_address, per.person_region, per.person_city, per.person_postal_code,
+    COUNT(per.person_name) as person_orders,
+    SUM(d.product_qty * p.product_unit_price) as total
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE per.person_type = 'C'
+    GROUP BY per.person_name, per.person_address, per.person_region, per.person_city,per.person_postal_code
+    ORDER BY total DESC LIMIT 5) as query1
+    UNION 
+    SELECT query2.person_address, query2.person_region, query2.person_city, query2.person_postal_code,query2.total FROM
+    (SELECT per.person_name,per.person_address, per.person_region, per.person_city, per.person_postal_code,
+    COUNT(per.person_name) as person_orders,
+    SUM(d.product_qty * p.product_unit_price) as total
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    WHERE per.person_type = 'C'
+    GROUP BY per.person_name, per.person_address, per.person_region, per.person_city,per.person_postal_code
+    ORDER BY total ASC LIMIT 5) as query2;
+    
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
+p1db.query9 = () => {
+  return new Promise((resolve, reject) => {
+    pool.query(`
+
+    SELECT d.disposition_id as order_number, per.person_name, per.person_phone_number, p.product_category, d.product_qty,
+    SUM(d.product_qty * p.product_unit_price) as total_products
+    FROM p1db.disposition d
+    JOIN p1db.product p ON p.product_id = d.product_id
+    JOIN p1db.person per on per.person_id = d.person_id
+    JOIN p1db.company c on c.company_id = d.company_id
+    WHERE per.person_type = 'P'
+    GROUP BY order_number, per.person_id, per.person_name, p.product_category, d.product_qty
+    ORDER BY d.product_qty ASC LIMIT 1;
+
+
+    `, (err, res) => {
+      if(err) {
+        reject(err)
+      }
+      return resolve(res);
+    });
+  });
+}
+
 p1db.query10 = () => {
   return new Promise((resolve, reject) => {
     pool.query(`
