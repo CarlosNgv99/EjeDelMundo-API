@@ -17,7 +17,7 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-router.get('/eliminarTemporal', async (req, res, next) => {
+router.delete('/eliminarTemporal', async (req, res, next) => {
     try {
         let result = await p1db.dropTemporal();
         res.setHeader('Content-Type', 'application/json');
@@ -51,6 +51,19 @@ router.get('/cargarTemporal', async (req, res, next) => {
         res.setHeader('Content-Type', 'application/json');
         res.statusCode = 200;
         res.json("DATA LOADED SUCCESSFULLY!");
+    } catch(e) {
+        var error = new Error(e)
+        res.statusCode = 403;
+        next(error);    
+    }
+});
+
+router.delete('/eliminarModelo', async (req, res, next) => {
+    try {
+        let result = await p1db.dropModel();
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        res.json(result);
     } catch(e) {
         var error = new Error(e)
         res.statusCode = 403;
