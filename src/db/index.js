@@ -15,7 +15,7 @@ let p1db = {};
 
 p1db.getData = () => {
   return new Promise((resolve, reject) => {
-    pool.query('SELECT * FROM data_center;', (err, res) => {
+    pool.query('SELECT * FROM p2db.data_center;', (err, res) => {
       if(err){
         reject(err);
       }
@@ -453,7 +453,7 @@ p1db.query6 = () => {
 p1db.query7 = () => {
   return new Promise((resolve, reject) => {
     pool.query(`
-    select queryaux.provider_id, queryaux.provider_name, SUM(queryaux.total) from 
+    select queryaux.provider_id, queryaux.provider_name, SUM(queryaux.total) as total_sold from 
     (SELECT pr.provider_id, pr.provider_name, pc.category, p.product_name,od.product_qty, p.product_unit_price,
     SUM(od.product_qty * p.product_unit_price) as total
     FROM p2db.order_detail od
@@ -462,7 +462,8 @@ p1db.query7 = () => {
     JOIN p2db.product_category pc ON pc.product_category_id = p.product_category
     WHERE pc.category = 'Fresh Vegetables'
     GROUP BY pr.provider_id, pr.provider_name, pc.category, p.product_name,od.product_qty, p.product_unit_price) as queryaux
-    group by queryaux.provider_id, queryaux.provider_name;
+    group by queryaux.provider_id, queryaux.provider_name
+    ORDER BY total_sold DESC limit 5;
     `, (err, res) => {
       if(err) {
         reject(err)
@@ -523,7 +524,7 @@ p1db.query9 = () => {
     JOIN p2db.company c on c.company_id = od.company_id
     GROUP BY pr.provider_registration_date, c.company_name,pr.provider_name, pr.provider_phone_number
     ORDER BY date_ocurrences ASC) as queryaux
-    ORDER BY queryaux.total_products ASC;
+    ORDER BY queryaux.total_products ASC limit 12;
 
 
     `, (err, res) => {

@@ -118,16 +118,17 @@ GROUP BY query2.category
 ORDER BY total_amount ASC LIMIT 1) as query3;
 
 -- QUERY 7 
-select queryaux.provider_id, queryaux.provider_name, SUM(queryaux.total) from 
-(SELECT pr.provider_id, pr.provider_name, pc.category, p.product_name,od.product_qty, p.product_unit_price,
-SUM(od.product_qty * p.product_unit_price) as total
-FROM p2db.order_detail od
-JOIN p2db.product p ON p.product_id = od.product_id
-JOIN p2db.provider pr on pr.provider_id = od.provider_id
-JOIN p2db.product_category pc ON pc.product_category_id = p.product_category
-WHERE pc.category = 'Fresh Vegetables'
-GROUP BY pr.provider_id, pr.provider_name, pc.category, p.product_name,od.product_qty, p.product_unit_price) as queryaux
-group by queryaux.provider_id, queryaux.provider_name;
+    select queryaux.provider_id, queryaux.provider_name, SUM(queryaux.total) as total_sold from 
+    (SELECT pr.provider_id, pr.provider_name, pc.category, p.product_name,od.product_qty, p.product_unit_price,
+    SUM(od.product_qty * p.product_unit_price) as total
+    FROM p2db.order_detail od
+    JOIN p2db.product p ON p.product_id = od.product_id
+    JOIN p2db.provider pr on pr.provider_id = od.provider_id
+    JOIN p2db.product_category pc ON pc.product_category_id = p.product_category
+    WHERE pc.category = 'Fresh Vegetables'
+    GROUP BY pr.provider_id, pr.provider_name, pc.category, p.product_name,od.product_qty, p.product_unit_price) as queryaux
+    group by queryaux.provider_id, queryaux.provider_name
+    ORDER BY total_sold DESC limit 5;
 
 -- QUERY 8
 SELECT query1.address_description, query1.address_region, query1.address_city, query1.address_postal_code,query1.total FROM

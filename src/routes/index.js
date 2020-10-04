@@ -17,7 +17,7 @@ router.get('/', async (req, res, next) => {
     }
 });
 
-router.delete('/eliminarTemporal', async (req, res, next) => {
+router.get('/eliminarTemporal', async (req, res, next) => {
     try {
         let result = await p1db.dropTemporal();
         res.setHeader('Content-Type', 'application/json');
@@ -58,7 +58,7 @@ router.get('/cargarTemporal', async (req, res, next) => {
     }
 });
 
-router.delete('/eliminarModelo', async (req, res, next) => {
+router.get('/eliminarModelo', async (req, res, next) => {
     try {
         let result = await p1db.dropModel();
         res.setHeader('Content-Type', 'application/json');
